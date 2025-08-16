@@ -1,103 +1,165 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+
+import ProductList from "@/components/ProductList";
+import SearchBar from "@/components/SearchBar";
+import SidebarFilters from "@/components/SidebarFilters";
+import type { Product } from "@/types";
+
+const BASE = process.env.NEXT_PUBLIC_DUMMYJSON_BASE_URL || "https://dummyjson.com";
+
+// Category cards with Unsplash images
+const categories = [
+  { title: "Electronics", image: "https://source.unsplash.com/400x300/?electronics", link: "?category=smartphones" },
+  { title: "Fashion", image: "https://source.unsplash.com/400x300/?fashion", link: "?category=mens-shirts" },
+  { title: "Home & Living", image: "https://source.unsplash.com/400x300/?home", link: "?category=home-decoration" },
+  { title: "Sports", image: "https://source.unsplash.com/400x300/?sports", link: "?category=sports-accessories" },
+];
+
+async function getProducts(
+  q: string | null,
+  category: string | null,
+  minPrice: string | null,
+  maxPrice: string | null,
+  sort: string | null
+): Promise<Product[]> {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+
+  let products: Product[] = [];
+
+  if (category) {
+    const res = await fetch(`${BASE}/products/category/${encodeURIComponent(category)}`);
+    const data = await res.json();
+    products = data.products || [];
+  } else if (q) {
+    const res = await fetch(`${BASE}/products/search?${params.toString()}`);
+    const data = await res.json();
+    products = data.products || [];
+  } else {
+    const res = await fetch(`${BASE}/products?limit=100`);
+    const data = await res.json();
+    products = data.products || [];
+  }
+
+  // Filter by price locally
+  if (minPrice) {
+    products = products.filter((p) => p.price >= Number(minPrice));
+  }
+  if (maxPrice) {
+    products = products.filter((p) => p.price <= Number(maxPrice));
+  }
+
+  // Sorting
+  if (sort === "price-asc") {
+    products = products.sort((a, b) => a.price - b.price);
+  } else if (sort === "price-desc") {
+    products = products.sort((a, b) => b.price - a.price);
+  }
+
+  return products;
+}
+
+export default function HomePage({
+  searchParams,
+}: {
+  searchParams: { q?: string; category?: string; minPrice?: string; maxPrice?: string; sort?: string };
+}) {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getProducts(
+      searchParams.q ?? null,
+      searchParams.category ?? null,
+      searchParams.minPrice ?? null,
+      searchParams.maxPrice ?? null,
+      searchParams.sort ?? null
+    ).then(setProducts);
+  }, [searchParams]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className="space-y-10">
+      {/* HERO SLIDER */}
+      <section className="relative rounded-xl overflow-hidden shadow-lg">
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          loop
+          className="w-full h-[400px]"
+        >
+          <SwiperSlide>
+            <img
+              src="https://source.unsplash.com/1600x400/?shopping"
+              alt="Shopping banner"
+              className="w-full h-full object-cover"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://source.unsplash.com/1600x400/?sale"
+              alt="Sale banner"
+              className="w-full h-full object-cover"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://source.unsplash.com/1600x400/?fashion"
+              alt="Fashion banner"
+              className="w-full h-full object-cover"
+            />
+          </SwiperSlide>
+        </Swiper>
+      </section>
+
+      {/* CATEGORY CARDS */}
+      <section className="max-w-6xl mx-auto px-4">
+        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {categories.map((cat) => (
+            <a
+              key={cat.title}
+              href={cat.link}
+              className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+            >
+              <img
+                src={cat.image}
+                alt={cat.title}
+                className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white font-semibold text-lg">{cat.title}</span>
+              </div>
+            </a>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* MAIN CONTENT */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto px-4" id="products">
+        <div className="md:col-span-3">
+          <SidebarFilters />
+        </div>
+        <div className="md:col-span-9 space-y-4">
+          {/* Mobile-only sticky SearchBar */}
+          <div className="block md:hidden sticky top-0 z-20 bg-white py-2 shadow-sm">
+            <SearchBar />
+          </div>
+
+          {/* Desktop-only SearchBar */}
+          <div className="hidden md:block">
+            <SearchBar />
+          </div>
+
+          <ProductList products={products} />
+        </div>
+      </div>
     </div>
   );
 }
