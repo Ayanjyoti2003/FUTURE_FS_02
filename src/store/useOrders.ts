@@ -1,4 +1,4 @@
-// src/store/useOrder.ts
+// src/store/useOrders.ts
 "use client";
 
 import { create } from "zustand";
@@ -15,14 +15,13 @@ export type Order = {
         image: string;
     }[];
     total: number;
+    status: string; // ✅ added
 };
 
 type OrderState = {
     orders: Order[];
     loading: boolean;
     fetchOrders: () => Promise<void>;
-    // NOTE: your API expects { items, shippingInfo } for POST, not this Order shape.
-    // Keep addOrder here if you use it elsewhere; otherwise adapt it later.
     addOrder: (order: Order) => Promise<void>;
     clearOrders: () => void;
 };
@@ -52,36 +51,36 @@ export const useOrders = create<OrderState>((set, get) => ({
 
             const data = await res.json();
 
-            // Accept both shapes: an array OR { orders: [...] }
             const raw: any[] = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.orders)
                     ? data.orders
                     : [];
 
-            // Map MongoDB docs -> UI shape
-            const mapped: Order[] = raw.map((o: any) => {
-                // o example from DB:
-                // {
-                //   _id, userUid, items:[{productId,title,price,image,qty,lineTotal}],
-                //   subtotal, shipping, total, status, createdAt
-                // }
-                return {
-                    id: String(o._id ?? o.id ?? ""),
-                    date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "",
-                    total: typeof o.total === "number" ? o.total : (o.subtotal ?? 0) + (o.shipping ?? 0),
-                    items: Array.isArray(o.items)
-                        ? o.items.map((it: any) => ({
-                            id: typeof it.productId === "number" ? it.productId : Number(it.productId ?? it.id ?? 0),
-                            title: it.title ?? "",
-                            price: typeof it.price === "number" ? it.price : 0,
-                            quantity: typeof it.qty === "number" ? it.qty : (it.quantity ?? 0),
-                            image: it.image ?? "",
-                        }))
-                        : [],
-                };
-            });
-            console.log("Fetched orders:", mapped);
+            const mapped: Order[] = raw.map((o: any) => ({
+                id: String(o._id ?? o.id ?? ""),
+                date: o.createdAt ? new Date(o.createdAt).toLocaleString() : "",
+                total:
+                    typeof o.total === "number"
+                        ? o.total
+                        : (o.subtotal ?? 0) + (o.shipping ?? 0),
+                status: o.status ?? "UNKNOWN", // ✅ keep status
+                items: Array.isArray(o.items)
+                    ? o.items.map((it: any) => ({
+                        id:
+                            typeof it.productId === "number"
+                                ? it.productId
+                                : Number(it.productId ?? it.id ?? 0),
+                        title: it.title ?? "",
+                        price: typeof it.price === "number" ? it.price : 0,
+                        quantity:
+                            typeof it.qty === "number"
+                                ? it.qty
+                                : (it.quantity ?? 0),
+                        image: it.image ?? "",
+                    }))
+                    : [],
+            }));
 
             set({ orders: mapped, loading: false });
         } catch (err) {
@@ -90,8 +89,6 @@ export const useOrders = create<OrderState>((set, get) => ({
         }
     },
 
-    // Your API /api/orders POST expects { items, shippingInfo }.
-    // If you’re not using addOrder from here, you can leave it or adapt later.
     addOrder: async (order) => {
         const token = await auth.currentUser?.getIdToken();
         if (!token) return;
