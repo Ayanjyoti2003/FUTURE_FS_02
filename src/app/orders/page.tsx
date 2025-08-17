@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useOrders } from "@/store/useOrders";
 import { format } from "date-fns";
 import Link from "next/link";
+import Image from "next/image"; // ✅ import Image
 
 function StatusBadge({ status }: { status: string }) {
     const normalized = status?.toUpperCase() || "UNKNOWN";
@@ -84,14 +85,16 @@ export default function OrderHistoryPage() {
                                         className="flex items-center justify-between py-2"
                                     >
                                         <Link
-                                            href={`/product/${item.id}`} // 👈 navigate to product page
+                                            href={`/product/${item.id}`}
                                             className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded transition"
                                         >
                                             {item.image && (
-                                                <img
+                                                <Image
                                                     src={item.image}
                                                     alt={item.title}
-                                                    className="w-12 h-12 object-cover rounded"
+                                                    width={48}  // ✅ must provide width
+                                                    height={48} // ✅ must provide height
+                                                    className="object-cover rounded"
                                                 />
                                             )}
                                             <div>
@@ -109,7 +112,6 @@ export default function OrderHistoryPage() {
                                     </li>
                                 ))}
                             </ul>
-
 
                             {/* View Details button */}
                             <div className="mt-4 flex justify-end">

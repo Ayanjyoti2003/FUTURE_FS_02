@@ -1,14 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+// app/api/orders/[id]/route.ts
+import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { verifyBearer } from "@/lib/firebaseAdmin";
 import { ObjectId } from "mongodb";
 
-interface Params {
+// ✅ Explicit context type for dynamic routes
+type RouteContext = {
     params: { id: string };
-}
+};
 
 // ✅ GET single order
-export async function GET(req: NextRequest, context: Params) {
+export async function GET(req: Request, context: RouteContext) {
     const { id } = context.params;
 
     const authHeader = req.headers.get("authorization");
@@ -29,11 +31,11 @@ export async function GET(req: NextRequest, context: Params) {
     const order = await db.collection("orders").findOne({ _id, userUid: decoded.uid });
     if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    return NextResponse.json(order);
+    return NextResponse.json({ ...order, _id: order._id.toString() });
 }
 
-// ✅ PATCH to cancel order
-export async function PATCH(req: NextRequest, context: Params) {
+// ✅ PATCH → cancel order
+export async function PATCH(req: Request, context: RouteContext) {
     const { id } = context.params;
 
     const authHeader = req.headers.get("authorization");

@@ -2,6 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import Image from "next/image"; // ✅ use Next.js Image
 import fashion2 from "../assets/fashion2.png";
 import electronics2 from "../assets/electronics2.png";
 import sale from "../assets/sale3.png";
@@ -27,24 +28,28 @@ export default function HeroSlider() {
                 className="w-full h-[240px]"
             >
                 <SwiperSlide>
-                    <img
-                        src={typeof electronics2 === "string" ? electronics2 : electronics2.src}
+                    <Image
+                        src={electronics2}
                         alt="Electronics banner"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        priority
                     />
                 </SwiperSlide>
                 <SwiperSlide>
-                    <img
-                        src={typeof sale === "string" ? sale : sale.src}
+                    <Image
+                        src={sale}
                         alt="Sale banner"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                     />
                 </SwiperSlide>
                 <SwiperSlide>
-                    <img
-                        src={typeof fashion2 === "string" ? fashion2 : fashion2.src}
+                    <Image
+                        src={fashion2}
                         alt="Fashion banner"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                     />
                 </SwiperSlide>
             </Swiper>

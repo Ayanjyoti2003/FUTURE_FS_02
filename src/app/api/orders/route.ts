@@ -3,9 +3,8 @@ import clientPromise from "@/lib/mongodb";
 import { verifyBearer } from "@/lib/firebaseAdmin";
 import { ObjectId } from "mongodb";
 
-
 type OrderItemIn = {
-    id: number;
+    id: number;   // ✅ number, consistent with Product + CartItem
     title: string;
     price: number;
     image?: string;
@@ -39,7 +38,13 @@ export async function GET(req: NextRequest) {
         .sort({ createdAt: -1 })
         .toArray();
 
-    return NextResponse.json(orders);
+    // Convert _id -> string for frontend
+    const normalized = orders.map((o) => ({
+        ...o,
+        _id: o._id.toString(),
+    }));
+
+    return NextResponse.json(normalized);
 }
 
 // POST /api/orders -> create order with PENDING status
@@ -64,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
     for (const i of items) {
         if (
-            typeof i?.id !== "number" ||
+            typeof i?.id !== "number" ||   // ✅ now number
             typeof i?.title !== "string" ||
             typeof i?.price !== "number" ||
             typeof i?.qty !== "number" ||
@@ -97,7 +102,7 @@ export async function POST(req: NextRequest) {
     const orderDoc = {
         userUid: decoded.uid,
         items: items.map((i) => ({
-            productId: i.id,
+            productId: i.id, // ✅ stays number
             title: i.title,
             price: i.price,
             image: i.image ?? "",
@@ -107,7 +112,7 @@ export async function POST(req: NextRequest) {
         subtotal: fromCents(subtotalCents),
         shipping: fromCents(shippingCents),
         total: fromCents(totalCents),
-        status: "PENDING" as const, // now starts as PENDING
+        status: "PENDING" as const,
         shippingInfo,
         createdAt: new Date(),
     };
@@ -120,10 +125,10 @@ export async function POST(req: NextRequest) {
         { upsert: true }
     );
 
-    return NextResponse.json({ ok: true, orderId: String(insertRes.insertedId) }, { status: 201 });
+    return NextResponse.json({ ok: true, orderId: insertRes.insertedId.toString() }, { status: 201 });
 }
 
-// PATCH /api/orders/:id -> update order status
+// PATCH /api/orders?id=xyz -> update order status
 export async function PATCH(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;

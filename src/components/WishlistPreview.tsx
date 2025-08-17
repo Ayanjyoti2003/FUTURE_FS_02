@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image"; // ✅ use Next.js Image
 import { useWishlist } from "@/store/useWishlist";
 
 export default function WishlistPreview() {
@@ -15,12 +16,17 @@ export default function WishlistPreview() {
                 <ul className="space-y-2">
                     {recent.map((item) => (
                         <li key={item.id} className="flex items-center gap-3">
-                            <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-12 h-12 rounded object-cover"
-                            />
-                            <span className="text-sm text-gray-700 line-clamp-1">{item.title}</span>
+                            <div className="relative w-12 h-12">
+                                <Image
+                                    src={item.image || "/placeholder.png"} // fallback in case image is missing
+                                    alt={item.title}
+                                    fill
+                                    className="rounded object-cover"
+                                />
+                            </div>
+                            <span className="text-sm text-gray-700 line-clamp-1">
+                                {item.title}
+                            </span>
                         </li>
                     ))}
                 </ul>

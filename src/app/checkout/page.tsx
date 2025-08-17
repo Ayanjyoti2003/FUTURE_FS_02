@@ -7,16 +7,7 @@ import { useCart } from "@/store/useCart";
 import { useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebaseClient";
 import { useOrders } from "@/store/useOrders";
-
-// ✅ define a CartItem type for items in cart
-type CartItem = {
-    id: string;
-    title: string;
-    price: number;
-    image?: string;
-    qty?: number;
-    quantity?: number;
-};
+import type { CartItem } from "@/types";
 
 type ShippingInfo = {
     fullName: string;
@@ -70,12 +61,12 @@ export default function CheckoutPage() {
 
             // API expects: { items: [{ id, title, price, image?, qty }], shippingInfo }
             const payload = {
-                items: (items as CartItem[]).map((i) => ({
-                    id: i.id,
+                items: items.map((i) => ({
+                    productId: i.id,
                     title: i.title,
                     price: i.price,
                     image: i.image ?? "",
-                    qty: i.qty ?? i.quantity ?? 1, // normalize qty
+                    qty: i.qty ?? 1, // normalize qty
                 })),
                 shippingInfo,
             };

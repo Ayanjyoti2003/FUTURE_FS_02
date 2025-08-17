@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/store/useWishlist";
 import { useOrders } from "@/store/useOrders";
@@ -11,9 +12,7 @@ import { CameraIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 export default function ProfilePage() {
     const { user } = useAuth();
 
-    // 🟣 Profile state from MongoDB (via store)
-    const { profile, fetchProfile, updateProfile, loading: profileLoading } =
-        useProfile();
+    const { profile, fetchProfile, updateProfile, loading: profileLoading } = useProfile();
 
     const [editing, setEditing] = useState(false);
     const [name, setName] = useState(profile?.name || user?.displayName || "");
@@ -22,12 +21,9 @@ export default function ProfilePage() {
     );
     const [activeTab, setActiveTab] = useState<"wishlist" | "orders">("wishlist");
 
-    // ✅ Always default to arrays
-    const { items: wishlist = [], fetchWishlist, loading: wishlistLoading } =
-        useWishlist();
+    const { items: wishlist = [], fetchWishlist, loading: wishlistLoading } = useWishlist();
     const { orders = [], fetchOrders, loading: ordersLoading } = useOrders();
 
-    // 🔹 Fetch profile, wishlist, and orders when user logs in
     useEffect(() => {
         if (user) {
             fetchProfile();
@@ -36,7 +32,6 @@ export default function ProfilePage() {
         }
     }, [user, fetchProfile, fetchOrders, fetchWishlist]);
 
-    // 🔹 Update local UI state when profile store changes
     useEffect(() => {
         if (profile) {
             setName(profile.name || "");
@@ -56,7 +51,7 @@ export default function ProfilePage() {
     };
 
     const handleSave = async () => {
-        await updateProfile({ name, photo }); // ✅ Save to MongoDB
+        await updateProfile({ name, photo });
         setEditing(false);
     };
 
@@ -76,9 +71,11 @@ export default function ProfilePage() {
                 {/* Avatar */}
                 <div className="relative flex justify-center -mt-16">
                     <div className="w-28 h-28 rounded-full border-4 border-white shadow overflow-hidden bg-gray-100 relative">
-                        <img
+                        <Image
                             src={photo}
                             alt="Profile"
+                            width={112} // 28 * 4
+                            height={112}
                             className="w-full h-full object-cover"
                         />
                         {editing && (
@@ -141,8 +138,8 @@ export default function ProfilePage() {
                         <button
                             onClick={() => setActiveTab("wishlist")}
                             className={`py-3 px-4 border-b-2 transition ${activeTab === "wishlist"
-                                    ? "border-purple-600 text-purple-600 font-semibold"
-                                    : "border-transparent text-gray-500 hover:text-gray-700"
+                                ? "border-purple-600 text-purple-600 font-semibold"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
                                 }`}
                         >
                             Wishlist
@@ -150,8 +147,8 @@ export default function ProfilePage() {
                         <button
                             onClick={() => setActiveTab("orders")}
                             className={`py-3 px-4 border-b-2 transition ${activeTab === "orders"
-                                    ? "border-purple-600 text-purple-600 font-semibold"
-                                    : "border-transparent text-gray-500 hover:text-gray-700"
+                                ? "border-purple-600 text-purple-600 font-semibold"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
                                 }`}
                         >
                             Order History
@@ -172,9 +169,11 @@ export default function ProfilePage() {
                                             key={item.id}
                                             className="bg-gray-50 rounded-lg p-3 shadow-sm"
                                         >
-                                            <img
+                                            <Image
                                                 src={item.image}
                                                 alt={item.title}
+                                                width={160}
+                                                height={96}
                                                 className="w-full h-24 object-cover rounded"
                                             />
                                             <h4 className="mt-2 text-sm font-medium">{item.title}</h4>

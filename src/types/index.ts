@@ -1,5 +1,6 @@
+// Product comes from DummyJSON API → keep id as number
 export type Product = {
-    id: number;
+    id: number;   // keep number, matches API
     title: string;
     description: string;
     price: number;
@@ -11,6 +12,7 @@ export type Product = {
     stock?: number;
 };
 
+// CartItem → store productId as number (since product.id is number)
 export type CartItem = {
     id: number;
     title: string;
@@ -19,6 +21,7 @@ export type CartItem = {
     qty: number;
 };
 
+// OrderItem → productId stays number, because it refers to Product
 export type OrderItem = {
     productId: number;
     title: string;
@@ -28,8 +31,9 @@ export type OrderItem = {
     lineTotal: number;
 };
 
+// Order itself → MongoDB _id is a string
 export type Order = {
-    _id?: string;
+    _id?: string;   // MongoDB id
     userUid: string;
     items: OrderItem[];
     subtotal: number;

@@ -4,6 +4,7 @@ import SearchBar from "@/components/SearchBar";
 import SidebarFilters from "@/components/SidebarFilters";
 import type { Product } from "@/types";
 import { getProducts } from "@/lib/getProducts";
+import Image from "next/image";
 
 import sports from "@/assets/sports.jpeg";
 import fashion from "@/assets/fashion.jpeg";
@@ -45,10 +46,12 @@ export default async function HomePage({
               href={cat.link}
               className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
             >
-              <img
-                src={typeof cat.image === "string" ? cat.image : cat.image.src}
+              <Image
+                src={cat.image}
                 alt={cat.title}
                 className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                width={400}
+                height={160}
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-white font-semibold text-lg">{cat.title}</span>
