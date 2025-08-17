@@ -14,11 +14,18 @@ import {
     XMarkIcon,
     HeartIcon,
 } from "@heroicons/react/24/outline";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
+
+// Loading component for SearchBar
+function SearchBarLoading() {
+    return (
+        <div className="w-64 h-10 bg-purple-400 rounded animate-pulse"></div>
+    );
+}
 
 export default function Navbar() {
     const { user } = useAuth();
-    const count = useCart((s) => s.count());
+    const cartCount = useCart((s) => s.count()); // ✅ Fixed: renamed 'count' to 'cartCount' to use it
     const { profile } = useProfile();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -48,15 +55,18 @@ export default function Navbar() {
 
                 {/* Right: Search + Buttons */}
                 <div className="flex items-center gap-4">
-                    {/* Desktop-only SearchBar */}
+                    {/* Desktop-only SearchBar wrapped in Suspense */}
                     <div className="hidden sm:block w-64">
-                        <SearchBar />
+                        <Suspense fallback={<SearchBarLoading />}>
+                            <SearchBar />
+                        </Suspense>
                     </div>
 
                     {/* Cart */}
                     <Link
                         href="/cart"
                         className="relative hover:text-purple-100 transition-colors"
+                        title={`Cart (${cartCount} items)`} // ✅ Fixed: now using cartCount
                     >
                         <ShoppingCartIcon className="w-6 h-6" />
                         <CartBadge />

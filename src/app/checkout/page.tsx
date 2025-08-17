@@ -7,7 +7,6 @@ import { useCart } from "@/store/useCart";
 import { useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebaseClient";
 import { useOrders } from "@/store/useOrders";
-import type { CartItem } from "@/types";
 
 type ShippingInfo = {
     fullName: string;
