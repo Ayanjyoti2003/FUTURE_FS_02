@@ -2,27 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useOrders } from "@/store/useOrders";
+import { useOrders, type Order, type OrderItem } from "@/store/useOrders";
 import { format } from "date-fns";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function OrderDetailsPage() {
-    const { id } = useParams(); // dynamic route param
+    // 👇 tell TS that `id` is a string
+    const { id } = useParams<{ id: string }>();
     const { orders, fetchOrders } = useOrders();
-    const [loading, setLoading] = useState(true);
-    const [order, setOrder] = useState<any>(null);
 
+    const [loading, setLoading] = useState(true);
+    const [order, setOrder] = useState<Order | null>(null);
+
+    // fetch orders once
     useEffect(() => {
-        async function load() {
+        (async () => {
             await fetchOrders();
             setLoading(false);
-        }
-        load();
+        })();
     }, [fetchOrders]);
 
+    // pick this order
     useEffect(() => {
         if (orders.length > 0 && id) {
-            const found = orders.find((o) => o.id === id);
-            setOrder(found || null);
+            const found = orders.find((o) => o.id === String(id));
+            setOrder(found ?? null);
         }
     }, [orders, id]);
 
@@ -47,21 +52,16 @@ export default function OrderDetailsPage() {
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold mb-6">
-                Order #{order.id}
-            </h1>
+            <h1 className="text-2xl font-bold mb-6">Order #{order.id}</h1>
 
             {/* Order Summary */}
             <div className="bg-white shadow rounded-lg p-6 mb-6">
                 <p>
                     <span className="font-medium">Date:</span>{" "}
-                    {order.date
-                        ? format(new Date(order.date), "PPPpp")
-                        : "N/A"}
+                    {order.date ? format(new Date(order.date), "PPPpp") : "N/A"}
                 </p>
                 <p>
-                    <span className="font-medium">Status:</span>{" "}
-                    {order.status}
+                    <span className="font-medium">Status:</span> {order.status}
                 </p>
                 <p>
                     <span className="font-medium">Total:</span> $
@@ -72,22 +72,24 @@ export default function OrderDetailsPage() {
             {/* Items */}
             <h2 className="text-lg font-semibold mb-3">Items</h2>
             <ul className="divide-y bg-white shadow rounded-lg">
-                {order.items.map((item: any) => (
+                {order.items.map((item: OrderItem) => (
                     <li
                         key={item.id}
                         className="flex items-center justify-between p-4"
                     >
-                        <a
-                            href={`/product/${item.id}`} // 👈 link to product page
+                        <Link
+                            href={`/product/${item.id}`}
                             className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded transition"
                         >
-                            {item.image && (
-                                <img
-                                    src={item.image}
+                            <div className="relative w-16 h-16">
+                                <Image
+                                    src={item.image || "/placeholder.png"}
                                     alt={item.title}
-                                    className="w-16 h-16 object-cover rounded"
+                                    fill
+                                    sizes="64px"
+                                    className="object-cover rounded"
                                 />
-                            )}
+                            </div>
                             <div>
                                 <p className="font-medium text-purple-600 hover:underline">
                                     {item.title}
@@ -96,14 +98,13 @@ export default function OrderDetailsPage() {
                                     Qty: {item.quantity} × ${item.price}
                                 </p>
                             </div>
-                        </a>
+                        </Link>
                         <p className="font-semibold">
                             ${(item.price * item.quantity).toFixed(2)}
                         </p>
                     </li>
                 ))}
             </ul>
-
         </div>
     );
 }

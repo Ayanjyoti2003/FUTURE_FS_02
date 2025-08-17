@@ -8,6 +8,25 @@ import { useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebaseClient";
 import { useOrders } from "@/store/useOrders";
 
+// ✅ define a CartItem type for items in cart
+type CartItem = {
+    id: string;
+    title: string;
+    price: number;
+    image?: string;
+    qty?: number;
+    quantity?: number;
+};
+
+type ShippingInfo = {
+    fullName: string;
+    address1: string;
+    city: string;
+    country: string;
+    zip: string;
+    phone: string;
+};
+
 export default function CheckoutPage() {
     const router = useRouter();
     const { user } = useAuth();
@@ -35,7 +54,7 @@ export default function CheckoutPage() {
         }
 
         const fd = new FormData(e.currentTarget);
-        const shippingInfo = {
+        const shippingInfo: ShippingInfo = {
             fullName: String(fd.get("fullName") || ""),
             address1: String(fd.get("address1") || ""),
             city: String(fd.get("city") || ""),
@@ -51,12 +70,12 @@ export default function CheckoutPage() {
 
             // API expects: { items: [{ id, title, price, image?, qty }], shippingInfo }
             const payload = {
-                items: items.map((i) => ({
+                items: (items as CartItem[]).map((i) => ({
                     id: i.id,
                     title: i.title,
                     price: i.price,
                     image: i.image ?? "",
-                    qty: i.qty ?? (i as any).quantity ?? 1, // normalize qty
+                    qty: i.qty ?? i.quantity ?? 1, // normalize qty
                 })),
                 shippingInfo,
             };
@@ -75,13 +94,15 @@ export default function CheckoutPage() {
                 throw new Error(err?.error || err?.message || "Failed to place order");
             }
 
-            // const { orderId } = await res.json(); // use if you add an order-confirmation page
-
             clear();             // empty cart locally
             await fetchOrders();  // refresh orders list
             router.push("/orders");
-        } catch (err: any) {
-            alert(err?.message || "Something went wrong");
+        } catch (err) {
+            if (err instanceof Error) {
+                alert(err.message);
+            } else {
+                alert("Something went wrong");
+            }
         } finally {
             setSubmitting(false);
         }

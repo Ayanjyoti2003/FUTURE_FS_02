@@ -3,11 +3,14 @@ import clientPromise from "@/lib/mongodb";
 import { verifyBearer } from "@/lib/firebaseAdmin";
 import { ObjectId } from "mongodb";
 
+interface Params {
+    params: { id: string };
+}
+
 // ✅ GET single order
-export async function GET(
-    req: NextRequest,
-    { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, context: Params) {
+    const { id } = context.params;
+
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
     const decoded = await verifyBearer(token);
@@ -18,7 +21,7 @@ export async function GET(
 
     let _id: ObjectId;
     try {
-        _id = new ObjectId(params.id);
+        _id = new ObjectId(id);
     } catch {
         return NextResponse.json({ error: "Invalid order id" }, { status: 400 });
     }
@@ -30,10 +33,9 @@ export async function GET(
 }
 
 // ✅ PATCH to cancel order
-export async function PATCH(
-    req: NextRequest,
-    { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, context: Params) {
+    const { id } = context.params;
+
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
     const decoded = await verifyBearer(token);
@@ -41,7 +43,7 @@ export async function PATCH(
 
     let _id: ObjectId;
     try {
-        _id = new ObjectId(params.id);
+        _id = new ObjectId(id);
     } catch {
         return NextResponse.json({ error: "Invalid order id" }, { status: 400 });
     }
@@ -60,7 +62,6 @@ export async function PATCH(
     const client = await clientPromise;
     const db = client.db("ecommerce");
 
-    // Only allow cancelling pending orders
     const result = await db.collection("orders").updateOne(
         { _id, userUid: decoded.uid, status: "PENDING" },
         { $set: { status: "CANCELLED", cancelledAt: new Date() } }
