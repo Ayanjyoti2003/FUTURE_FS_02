@@ -4,14 +4,12 @@ import clientPromise from "@/lib/mongodb";
 import { verifyBearer } from "@/lib/firebaseAdmin";
 import { ObjectId } from "mongodb";
 
-// ✅ Explicit context type for dynamic routes
-type RouteContext = {
-    params: { id: string };
-};
-
 // ✅ GET single order
-export async function GET(req: Request, context: RouteContext) {
-    const { id } = context.params;
+export async function GET(
+    req: Request,
+    { params }: { params: { id: string } }
+) {
+    const { id } = params;
 
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
@@ -35,8 +33,11 @@ export async function GET(req: Request, context: RouteContext) {
 }
 
 // ✅ PATCH → cancel order
-export async function PATCH(req: Request, context: RouteContext) {
-    const { id } = context.params;
+export async function PATCH(
+    req: Request,
+    { params }: { params: { id: string } }
+) {
+    const { id } = params;
 
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
