@@ -7,9 +7,10 @@ import { ObjectId } from "mongodb";
 // ✅ GET single order
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = params;
+    // Await the params Promise to get the actual params object
+    const { id } = await params;
 
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
@@ -35,9 +36,10 @@ export async function GET(
 // ✅ PATCH → cancel order
 export async function PATCH(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = params;
+    // Await the params Promise to get the actual params object
+    const { id } = await params;
 
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;

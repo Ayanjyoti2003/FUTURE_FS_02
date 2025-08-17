@@ -7,8 +7,8 @@ import type { CartItem } from "@/types";
 type CartState = {
     items: CartItem[];
     add: (item: Omit<CartItem, "qty"> & { qty?: number }) => void;
-    remove: (id: string) => void;
-    updateQty: (id: string, qty: number) => void;
+    remove: (id: number) => void; // ✅ Fixed: changed from string to number
+    updateQty: (id: number, qty: number) => void; // ✅ Fixed: changed from string to number
     clear: () => void;
     subtotal: () => number;
     count: () => number;

@@ -12,8 +12,11 @@ async function getProduct(id: string): Promise<Product | null> {
     return data;
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-    const product = await getProduct(params.id);
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+    // Await the params Promise to get the actual params object
+    const { id } = await params;
+
+    const product = await getProduct(id);
     if (!product) return notFound();
 
     return (

@@ -1,81 +1,48 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
-import { useCart } from "@/store/useCart";
+import { Suspense } from "react";
+import CartPageContent from "@/components/CartPageContent";
 
 export default function CartPage() {
-    const { items, updateQty, remove, subtotal } = useCart();
+    return (
+        <Suspense fallback={<CartPageFallback />}>
+            <CartPageContent />
+        </Suspense>
+    );
+}
 
+function CartPageFallback() {
     return (
         <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-3">
                 <h1 className="text-xl font-semibold">Your Cart</h1>
-                {items.length === 0 && <p>Your cart is empty.</p>}
-                {items.map((i) => (
-                    <div
-                        key={i.id}
-                        className="flex items-center gap-3 border border-gray-200 rounded p-3 bg-white shadow-sm"
-                    >
-                        <div className="relative w-16 h-16 rounded overflow-hidden">
-                            <Image
-                                src={i.image || "/placeholder.png"}
-                                alt={i.title}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-medium">{i.title}</p>
-                            <p className="text-sm text-gray-600">${i.price.toFixed(2)}</p>
-                            <div className="mt-2 flex items-center gap-2">
-                                <input
-                                    type="number"
-                                    min={1}
-                                    value={i.qty}
-                                    onChange={(e) =>
-                                        updateQty(i.id, Number(e.target.value))
-                                    }
-                                    className="w-16 border border-gray-300 rounded px-2 py-1"
-                                />
-                                <button
-                                    className="text-sm text-red-500 hover:underline"
-                                    onClick={() => remove(i.id)}
-                                >
-                                    Remove
-                                </button>
+                <div className="animate-pulse space-y-3">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3 border border-gray-200 rounded p-3 bg-white shadow-sm">
+                            <div className="w-16 h-16 bg-gray-200 rounded"></div>
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                <div className="h-8 bg-gray-200 rounded w-20"></div>
                             </div>
+                            <div className="h-6 bg-gray-200 rounded w-16"></div>
                         </div>
-                        <div className="font-semibold">
-                            ${(i.price * i.qty).toFixed(2)}
+                    ))}
+                </div>
+            </div>
+            <div className="border border-gray-200 rounded p-4 h-fit bg-white shadow-sm">
+                <div className="animate-pulse space-y-4">
+                    <div className="h-5 bg-gray-200 rounded w-32"></div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between">
+                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                            <div className="h-4 bg-gray-200 rounded w-12"></div>
+                        </div>
+                        <div className="flex justify-between">
+                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                            <div className="h-4 bg-gray-200 rounded w-12"></div>
                         </div>
                     </div>
-                ))}
-            </div>
-
-            <div className="border border-gray-200 rounded p-4 h-fit bg-white shadow-sm">
-                <h2 className="font-semibold">Order Summary</h2>
-                <div className="mt-2 flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${subtotal().toFixed(2)}</span>
+                    <div className="h-10 bg-gray-200 rounded w-full"></div>
                 </div>
-                <div className="mt-2 flex justify-between">
-                    <span>Shipping</span>
-                    <span>$10.00</span>
-                </div>
-                <div className="mt-2 pt-2 border-t flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span>${(subtotal() + 10).toFixed(2)}</span>
-                </div>
-                <Link
-                    href="/checkout"
-                    className={`mt-4 block w-full text-center px-4 py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors ${items.length === 0
-                            ? "pointer-events-none opacity-50"
-                            : ""
-                        }`}
-                >
-                    Proceed to Checkout
-                </Link>
             </div>
         </div>
     );

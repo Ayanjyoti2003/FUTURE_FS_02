@@ -1,7 +1,7 @@
 import HeroSlider from "@/components/HeroSlider";
 import ProductList from "@/components/ProductList";
-import SearchBar from "@/components/SearchBar";
-import SidebarFilters from "@/components/SidebarFilters";
+import SearchBarWrapper from "@/components/SearchBarWrapper"; // ✅ Use wrapper
+import SidebarFiltersWrapper from "@/components/SidebarFiltersWrapper"; // ✅ Use wrapper
 import type { Product } from "@/types";
 import { getProducts } from "@/lib/getProducts";
 import Image from "next/image";
@@ -21,14 +21,17 @@ const categories = [
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { q?: string; category?: string; minPrice?: string; maxPrice?: string; sort?: string };
+  searchParams: Promise<{ q?: string; category?: string; minPrice?: string; maxPrice?: string; sort?: string }>;
 }) {
+  // Await the searchParams Promise to get the actual search parameters
+  const params = await searchParams;
+
   const products: Product[] = await getProducts(
-    searchParams.q ?? null,
-    searchParams.category ?? null,
-    searchParams.minPrice ?? null,
-    searchParams.maxPrice ?? null,
-    searchParams.sort ?? null
+    params.q ?? null,
+    params.category ?? null,
+    params.minPrice ?? null,
+    params.maxPrice ?? null,
+    params.sort ?? null
   );
 
   return (
@@ -64,14 +67,14 @@ export default async function HomePage({
       {/* MAIN CONTENT */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto px-4" id="products">
         <div className="md:col-span-3">
-          <SidebarFilters />
+          <SidebarFiltersWrapper />
         </div>
         <div className="md:col-span-9 space-y-4">
           <div className="block md:hidden sticky top-0 z-20 bg-white py-2 shadow-sm">
-            <SearchBar />
+            <SearchBarWrapper />
           </div>
           <div className="hidden md:block">
-            <SearchBar />
+            <SearchBarWrapper />
           </div>
           <ProductList products={products} />
         </div>

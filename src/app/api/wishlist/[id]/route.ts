@@ -12,14 +12,17 @@ type WishlistItem = {
 // DELETE /api/wishlist/:id  -> returns { wishlist: [...] }
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    // Await the params Promise to get the actual params object
+    const { id } = await params;
+
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
     const decoded = await verifyBearer(token);
     if (!decoded) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const idNum = Number(params.id);
+    const idNum = Number(id);
     if (Number.isNaN(idNum)) {
         return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
