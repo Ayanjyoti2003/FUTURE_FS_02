@@ -3,15 +3,23 @@
 import type { Product } from "@/types";
 import ProductCard from "@/components/ProductCard";
 
-export default function ProductList({ products }: { products: Product[] }) {
+interface ProductListProps {
+    products: Product[];
+}
+
+export default function ProductList({ products }: ProductListProps) {
     if (!products || products.length === 0) {
-        return <p className="text-gray-500 text-center">No products found.</p>;
+        return (
+            <div className="text-center py-8">
+                <p className="text-gray-500">No products found.</p>
+            </div>
+        );
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((p) => (
-                <ProductCard key={p.id} p={p} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {products.map((product) => (
+                <ProductCard key={product.id} p={product} />
             ))}
         </div>
     );

@@ -3,8 +3,9 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductList from "@/components/ProductList";
-import SearchBar from "@/components/SearchBar";
 import SidebarFilters from "@/components/SidebarFilters";
+import MobileFiltersModal from "@/components/MobileFiltersModal";
+import MobileSearchBar from "@/components/MobileSearchBar";
 import type { Product } from "@/types";
 
 const BASE = process.env.NEXT_PUBLIC_DUMMYJSON_BASE_URL || "https://dummyjson.com";
@@ -30,44 +31,73 @@ function ProductsContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get("query");
     const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getProducts(query).then(setProducts);
+        setLoading(true);
+        getProducts(query).then((data) => {
+            setProducts(data);
+            setLoading(false);
+        });
     }, [query]);
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* Sidebar */}
-            <div className="md:col-span-3">
-                <Suspense fallback={<SidebarFiltersLoading />}>
-                    <SidebarFilters />
-                </Suspense>
+        <>
+            {/* Mobile Search Bar - Sticky */}
+            <MobileSearchBar />
+
+            {/* Main Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Desktop Sidebar - Hidden on mobile */}
+                <div className="hidden lg:block lg:col-span-3">
+                    <div className="sticky top-20">
+                        <SidebarFilters />
+                    </div>
+                </div>
+
+                {/* Products Section */}
+                <div className="lg:col-span-9">
+                    {/* Search Results Header */}
+                    {query && (
+                        <div className="mb-6 px-4 lg:px-0">
+                            <h2 className="text-xl font-semibold text-gray-800">
+                                Search results for: "{query}"
+                            </h2>
+                            <p className="text-gray-600 mt-1">
+                                {loading ? 'Searching...' : `${products.length} products found`}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Products Grid */}
+                    <div className="px-4 lg:px-0">
+                        {loading ? (
+                            <ProductsListLoading />
+                        ) : (
+                            <ProductList products={products} />
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {/* Search + Products */}
-            <div className="md:col-span-9 space-y-4">
-                <Suspense fallback={<SearchBarLoading />}>
-                    <SearchBar />
-                </Suspense>
-                <ProductList products={products} />
-            </div>
-        </div>
+            {/* Mobile Filter Modal */}
+            <MobileFiltersModal />
+        </>
     );
 }
 
 // Loading components
 function ProductsPageLoading() {
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* Sidebar Loading */}
-            <div className="md:col-span-3">
-                <SidebarFiltersLoading />
-            </div>
-
-            {/* Search + Products Loading */}
-            <div className="md:col-span-9 space-y-4">
-                <SearchBarLoading />
-                <ProductsListLoading />
+        <div className="space-y-6">
+            <MobileSearchBar />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="hidden lg:block lg:col-span-3">
+                    <SidebarFiltersLoading />
+                </div>
+                <div className="lg:col-span-9 px-4 lg:px-0">
+                    <ProductsListLoading />
+                </div>
             </div>
         </div>
     );
@@ -84,16 +114,10 @@ function SidebarFiltersLoading() {
     );
 }
 
-function SearchBarLoading() {
-    return (
-        <div className="w-full h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-    );
-}
-
 function ProductsListLoading() {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white rounded-lg shadow p-4 animate-pulse">
                     <div className="h-48 bg-gray-200 rounded mb-4"></div>
                     <div className="h-6 bg-gray-200 rounded mb-2"></div>
@@ -108,8 +132,10 @@ function ProductsListLoading() {
 // Main page component
 export default function ProductsPage() {
     return (
-        <Suspense fallback={<ProductsPageLoading />}>
-            <ProductsContent />
-        </Suspense>
+        <div className="min-h-screen">
+            <Suspense fallback={<ProductsPageLoading />}>
+                <ProductsContent />
+            </Suspense>
+        </div>
     );
 }
