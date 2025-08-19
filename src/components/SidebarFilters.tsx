@@ -114,7 +114,7 @@ export default function SidebarFilters() {
                             <span>{showCategories ? "−" : "+"}</span>
                         </button>
                         {showCategories && (
-                            <div className="mt-2 space-y-1">
+                            <div className="mt-2 space-y-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
                                 <button
                                     className={`block w-full text-left px-2 py-1 rounded-md transition-colors ${!activeCategory
                                         ? "bg-purple-600 text-white"

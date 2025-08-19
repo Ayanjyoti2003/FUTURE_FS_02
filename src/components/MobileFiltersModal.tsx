@@ -162,13 +162,13 @@ export default function MobileFiltersModal() {
                             {/* Categories */}
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 pr-2">
                                     {/* All Categories Button */}
                                     <button
                                         onClick={() => setSelectedCategories([])}
                                         className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedCategories.length === 0
-                                                ? "bg-purple-600 text-white"
-                                                : "hover:bg-gray-100 text-gray-700 border"
+                                            ? "bg-purple-600 text-white"
+                                            : "hover:bg-gray-100 text-gray-700 border"
                                             }`}
                                     >
                                         All Categories
@@ -182,8 +182,8 @@ export default function MobileFiltersModal() {
                                                 key={category}
                                                 onClick={() => toggleCategory(category)}
                                                 className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${isSelected
-                                                        ? "bg-purple-600 text-white"
-                                                        : "hover:bg-gray-100 text-gray-700 border"
+                                                    ? "bg-purple-600 text-white"
+                                                    : "hover:bg-gray-100 text-gray-700 border"
                                                     }`}
                                             >
                                                 <span className="flex items-center justify-between">
