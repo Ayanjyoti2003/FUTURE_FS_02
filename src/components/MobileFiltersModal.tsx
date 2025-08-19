@@ -1,35 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { XMarkIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import SidebarFilters from './SidebarFilters';
 
 export default function MobileFiltersModal() {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Prevent body scroll when modal is open
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
-        // Cleanup on unmount
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
-
     const handleClose = () => {
         setIsOpen(false);
-    };
-
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        // Only close if clicking the backdrop itself, not its children
-        if (e.target === e.currentTarget) {
-            handleClose();
-        }
     };
 
     return (
@@ -43,17 +22,11 @@ export default function MobileFiltersModal() {
                 <AdjustmentsHorizontalIcon className="w-6 h-6" />
             </button>
 
-            {/* Modal Overlay */}
+            {/* Filter Modal - No backdrop, just corner popup */}
             {isOpen && (
-                <div
-                    className="fixed inset-0 z-50 md:hidden"
-                    onClick={handleBackdropClick}
-                >
-                    {/* Backdrop */}
-                    <div className="absolute inset-0 bg-black bg-opacity-50" />
-
+                <div className="fixed bottom-4 right-4 z-50 md:hidden">
                     {/* Corner Modal - Bottom Right */}
-                    <div className="absolute bottom-4 right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] bg-white rounded-lg shadow-2xl transform transition-all duration-300 ease-out">
+                    <div className="w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] bg-white rounded-lg shadow-2xl border transform transition-all duration-300 ease-out">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-t-lg">
                             <h2 className="text-lg font-semibold">Filters</h2>

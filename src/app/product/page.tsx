@@ -10,17 +10,65 @@ import type { Product } from "@/types";
 
 const BASE = process.env.NEXT_PUBLIC_DUMMYJSON_BASE_URL || "https://dummyjson.com";
 
-async function getProducts(query: string | null): Promise<Product[]> {
+async function getProducts(
+    query: string | null,
+    category: string | null,
+    minPrice: string | null,
+    maxPrice: string | null,
+    sort: string | null
+): Promise<Product[]> {
     let products: Product[] = [];
 
-    if (query) {
-        const res = await fetch(`${BASE}/products/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        products = data.products || [];
-    } else {
-        const res = await fetch(`${BASE}/products?limit=100`);
-        const data = await res.json();
-        products = data.products || [];
+    try {
+        if (query) {
+            // Search by query
+            const res = await fetch(`${BASE}/products/search?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            products = data.products || [];
+        } else if (category) {
+            // Filter by category
+            const res = await fetch(`${BASE}/products/category/${encodeURIComponent(category)}`);
+            const data = await res.json();
+            products = data.products || [];
+        } else {
+            // Get all products
+            const res = await fetch(`${BASE}/products?limit=100`);
+            const data = await res.json();
+            products = data.products || [];
+        }
+
+        // Apply price filtering
+        if (minPrice || maxPrice) {
+            products = products.filter((product) => {
+                const price = product.price;
+                const min = minPrice ? parseFloat(minPrice) : 0;
+                const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+                return price >= min && price <= max;
+            });
+        }
+
+        // Apply sorting
+        if (sort) {
+            products.sort((a, b) => {
+                switch (sort) {
+                    case 'price-asc':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    case 'name-asc':
+                        return a.title.localeCompare(b.title);
+                    case 'name-desc':
+                        return b.title.localeCompare(a.title);
+                    case 'rating':
+                        return (b.rating || 0) - (a.rating || 0);
+                    default:
+                        return 0;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        products = [];
     }
 
     return products;
@@ -30,16 +78,44 @@ async function getProducts(query: string | null): Promise<Product[]> {
 function ProductsContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get("query");
+    const category = searchParams.get("category");
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    const sort = searchParams.get("sort");
+
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
-        getProducts(query).then((data) => {
+        getProducts(query, category, minPrice, maxPrice, sort).then((data) => {
             setProducts(data);
             setLoading(false);
         });
-    }, [query]);
+    }, [query, category, minPrice, maxPrice, sort]);
+
+    // Create filter summary for display
+    const getFilterSummary = () => {
+        const filters = [];
+        if (query) filters.push(`Search: "${query}"`);
+        if (category) filters.push(`Category: ${category.replace('-', ' ')}`);
+        if (minPrice) filters.push(`Min: $${minPrice}`);
+        if (maxPrice) filters.push(`Max: $${maxPrice}`);
+        if (sort) {
+            const sortLabels = {
+                'price-asc': 'Price: Low to High',
+                'price-desc': 'Price: High to Low',
+                'name-asc': 'Name: A to Z',
+                'name-desc': 'Name: Z to A',
+                'rating': 'Top Rated'
+            };
+            filters.push(sortLabels[sort as keyof typeof sortLabels] || `Sort: ${sort}`);
+        }
+        return filters;
+    };
+
+    const filterSummary = getFilterSummary();
+    const hasFilters = query || category || minPrice || maxPrice || sort;
 
     return (
         <>
@@ -57,14 +133,24 @@ function ProductsContent() {
 
                 {/* Products Section */}
                 <div className="lg:col-span-9">
-                    {/* Search Results Header */}
-                    {query && (
+                    {/* Filter Results Header */}
+                    {hasFilters && (
                         <div className="mb-6 px-4 lg:px-0">
                             <h2 className="text-xl font-semibold text-gray-800">
-                                Search results for: &ldquo;{query}&rdquo;
+                                {query ? `Search results for: &ldquo;${query}&rdquo;` : 'Filtered Results'}
                             </h2>
-                            <p className="text-gray-600 mt-1">
-                                {loading ? 'Searching...' : `${products.length} products found`}
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {filterSummary.map((filter, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-block bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full"
+                                    >
+                                        {filter}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="text-gray-600 mt-2">
+                                {loading ? 'Loading...' : `${products.length} products found`}
                             </p>
                         </div>
                     )}
