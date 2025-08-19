@@ -61,7 +61,7 @@ function ProductsContent() {
                     {query && (
                         <div className="mb-6 px-4 lg:px-0">
                             <h2 className="text-xl font-semibold text-gray-800">
-                                Search results for: "{query}"
+                                Search results for: &ldquo;{query}&rdquo;
                             </h2>
                             <p className="text-gray-600 mt-1">
                                 {loading ? 'Searching...' : `${products.length} products found`}

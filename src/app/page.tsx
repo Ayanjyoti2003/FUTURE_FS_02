@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import ProductList from "@/components/ProductList";
 import MobileSearchBar from "@/components/MobileSearchBar";
 import type { Product } from "@/types";
@@ -66,12 +67,12 @@ export default async function HomePage() {
               Discover amazing products at unbeatable prices. From beauty essentials to luxury watches,
               we have everything you need.
             </p>
-            <a
+            <Link
               href="/product"
               className="inline-block bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors duration-200"
             >
               Shop Now
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -82,12 +83,12 @@ export default async function HomePage() {
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">
             Featured Products
           </h2>
-          <a
+          <Link
             href="/product"
             className="text-purple-600 hover:text-purple-700 font-medium text-sm md:text-base"
           >
             View All →
-          </a>
+          </Link>
         </div>
 
         <Suspense fallback={<HomeLoading />}>
@@ -108,7 +109,7 @@ export default async function HomePage() {
             { name: 'Furniture', emoji: '🛋️', href: '/product?category=furniture' },
             { name: 'Groceries', emoji: '🛒', href: '/product?category=groceries' }
           ].map((category) => (
-            <a
+            <Link
               key={category.name}
               href={category.href}
               className="bg-white rounded-lg p-4 md:p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200 border"
@@ -117,7 +118,7 @@ export default async function HomePage() {
               <div className="font-semibold text-gray-800 text-sm md:text-base">
                 {category.name}
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
