@@ -26,10 +26,25 @@ async function getProducts(
             const data = await res.json();
             products = data.products || [];
         } else if (category) {
-            // Filter by category
-            const res = await fetch(`${BASE}/products/category/${encodeURIComponent(category)}`);
-            const data = await res.json();
-            products = data.products || [];
+            // Handle multiple categories
+            const categories = category.split(',').map(c => c.trim());
+            const allCategoryProducts = new Set<Product>();
+
+            // Fetch products for each category
+            await Promise.all(
+                categories.map(async (cat) => {
+                    try {
+                        const res = await fetch(`${BASE}/products/category/${encodeURIComponent(cat)}`);
+                        const data = await res.json();
+                        const categoryProducts = data.products || [];
+                        categoryProducts.forEach((product: Product) => allCategoryProducts.add(product));
+                    } catch (error) {
+                        console.error(`Error fetching category ${cat}:`, error);
+                    }
+                })
+            );
+
+            products = Array.from(allCategoryProducts);
         } else {
             // Get all products
             const res = await fetch(`${BASE}/products?limit=100`);

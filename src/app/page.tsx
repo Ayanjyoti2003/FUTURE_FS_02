@@ -92,9 +92,9 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { name: 'Electronics', image: electronics, href: '/product?category=smartphones' },
-            { name: 'Fashion', image: fashion, href: '/product?category=mens-shirts' },
-            { name: 'Home & Living', image: home, href: '/product?category=home-decoration' },
+            { name: 'Electronics', image: electronics, href: '/product?category=smartphones,laptops,tablets' },
+            { name: 'Fashion', image: fashion, href: '/product?category=mens-shirts,mens-shoes,womens-dresses,womens-shoes' },
+            { name: 'Home & Living', image: home, href: '/product?category=home-decoration,furniture,kitchen-accessories' },
             { name: 'Sports', image: sports, href: '/product?category=sports-accessories' }
           ].map((category) => (
             <Link
