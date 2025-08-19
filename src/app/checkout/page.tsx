@@ -61,7 +61,7 @@ export default function CheckoutPage() {
             // API expects: { items: [{ id, title, price, image?, qty }], shippingInfo }
             const payload = {
                 items: items.map((i) => ({
-                    productId: i.id,
+                    id: i.id,  // Fix: changed from productId to id
                     title: i.title,
                     price: i.price,
                     image: i.image ?? "",
@@ -84,9 +84,13 @@ export default function CheckoutPage() {
                 throw new Error(err?.error || err?.message || "Failed to place order");
             }
 
+            const result = await res.json();
+
             clear();             // empty cart locally
             await fetchOrders();  // refresh orders list
-            router.push("/orders");
+
+            // Redirect to success page with order ID
+            router.push(`/checkout/success?orderId=${result.orderId}`);
         } catch (err) {
             if (err instanceof Error) {
                 alert(err.message);

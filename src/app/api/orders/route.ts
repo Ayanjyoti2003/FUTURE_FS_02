@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
         subtotal: fromCents(subtotalCents),
         shipping: fromCents(shippingCents),
         total: fromCents(totalCents),
-        status: "PENDING" as const,
+        status: "PAID" as const,  // Changed from PENDING to PAID for simulated payment
         shippingInfo,
         createdAt: new Date(),
     };

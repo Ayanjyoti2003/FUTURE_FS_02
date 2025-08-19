@@ -1,39 +1,32 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function CheckoutSuccessContent() {
-    const { user } = useAuth();
     const searchParams = useSearchParams();
     const orderId = searchParams.get("orderId");
 
-    useEffect(() => {
-        const updateStatus = async () => {
-            if (!user || !orderId) return;
-            const token = await user.getIdToken();
-
-            await fetch(`/api/orders?id=${orderId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ status: "PAID" }),
-            });
-        };
-        updateStatus();
-    }, [user, orderId]);
+    // No need to update status since orders are created as "PAID" directly
+    // useEffect for status update removed since it's handled in the API
 
     return (
         <div className="text-center py-10">
             <h1 className="text-3xl font-bold text-green-600">Payment Successful!</h1>
-            <p className="mt-4 text-gray-600">Your order is now marked as paid.</p>
+            <p className="mt-4 text-gray-600">Your simulated payment has been processed and your order is confirmed as paid.</p>
             {orderId && (
                 <p className="mt-2 text-sm text-gray-500">Order ID: {orderId}</p>
             )}
+            <div className="mt-6">
+                <Link
+                    href="/orders"
+                    className="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                    View Your Orders
+                </Link>
+            </div>
         </div>
     );
 }
