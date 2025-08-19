@@ -25,9 +25,9 @@ async function getProducts(
             const res = await fetch(`${BASE}/products/search?q=${encodeURIComponent(query)}`);
             const data = await res.json();
             products = data.products || [];
-        } else if (category) {
-            // Handle multiple categories
-            const categories = category.split(',').map(c => c.trim());
+        } else if (category && typeof category === 'string' && category.length > 0) {
+            // Handle multiple categories with proper type checking
+            const categories = category.split(',').map(c => c.trim()).filter(c => c.length > 0);
             const allCategoryProducts = new Set<Product>();
 
             // Fetch products for each category

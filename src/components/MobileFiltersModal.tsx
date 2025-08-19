@@ -38,7 +38,20 @@ export default function MobileFiltersModal() {
             `${process.env.NEXT_PUBLIC_DUMMYJSON_BASE_URL ?? "https://dummyjson.com"}/products/categories`
         )
             .then((r) => r.json())
-            .then((data) => setCategories(data || []));
+            .then((data) => {
+                // Ensure data is an array of strings
+                if (Array.isArray(data)) {
+                    const validCategories = data.filter(cat => cat && typeof cat === 'string');
+                    setCategories(validCategories);
+                } else {
+                    console.warn('Categories API returned invalid data:', data);
+                    setCategories([]);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching categories:', error);
+                setCategories([]);
+            });
     }, []);
 
     // Set initial values from URL
@@ -46,22 +59,31 @@ export default function MobileFiltersModal() {
         setMinPrice(searchParams.get("minPrice") ?? "");
         setMaxPrice(searchParams.get("maxPrice") ?? "");
 
-        // Handle multiple categories from URL
+        // Handle multiple categories from URL - with proper type checking
         const categoryParam = searchParams.get("category");
-        if (categoryParam) {
-            setSelectedCategories(categoryParam.split(','));
+        if (categoryParam && typeof categoryParam === 'string' && categoryParam.length > 0) {
+            setSelectedCategories(categoryParam.split(',').map(c => c.trim()).filter(c => c.length > 0));
         } else {
             setSelectedCategories([]);
         }
     }, [searchParams]);
 
-    // Toggle category selection (allow multiple)
+    // Toggle category selection (allow multiple) - with safety checks
     const toggleCategory = (category: string) => {
-        const newSelected = selectedCategories.includes(category)
-            ? selectedCategories.filter(c => c !== category)
-            : [...selectedCategories, category];
+        if (!category || typeof category !== 'string') {
+            console.warn('Invalid category passed to toggleCategory:', category);
+            return;
+        }
 
-        setSelectedCategories(newSelected);
+        try {
+            const newSelected = selectedCategories.includes(category)
+                ? selectedCategories.filter(c => c !== category)
+                : [...selectedCategories, category];
+
+            setSelectedCategories(newSelected);
+        } catch (error) {
+            console.error('Error in toggleCategory:', error);
+        }
     };
 
     // Get categories by group
@@ -82,24 +104,27 @@ export default function MobileFiltersModal() {
     const applyFilters = () => {
         const qp = new URLSearchParams(searchParams.toString());
 
-        // Set categories (multiple)
-        if (selectedCategories.length > 0) {
-            qp.set("category", selectedCategories.join(','));
+        // Set categories (multiple) - with validation
+        if (selectedCategories && selectedCategories.length > 0) {
+            const validCategories = selectedCategories.filter(cat => cat && typeof cat === 'string' && cat.trim().length > 0);
+            if (validCategories.length > 0) {
+                qp.set("category", validCategories.join(','));
+            } else {
+                qp.delete("category");
+            }
         } else {
             qp.delete("category");
         }
 
         // Set price range
-        if (minPrice) qp.set("minPrice", minPrice);
+        if (minPrice && minPrice.trim()) qp.set("minPrice", minPrice.trim());
         else qp.delete("minPrice");
-        if (maxPrice) qp.set("maxPrice", maxPrice);
+        if (maxPrice && maxPrice.trim()) qp.set("maxPrice", maxPrice.trim());
         else qp.delete("maxPrice");
 
         router.push(`/product?${qp.toString()}`);
         handleClose();
-    };
-
-    // Clear all filters
+    };    // Clear all filters
     const clearFilters = () => {
         const qp = new URLSearchParams(searchParams.toString());
         qp.delete("category");
