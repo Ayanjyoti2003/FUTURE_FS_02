@@ -21,17 +21,6 @@ export default function MobileFiltersModal() {
         setIsOpen(false);
     };
 
-    // Create category groups for better organization
-    const categoryGroups = {
-        electronics: ['smartphones', 'laptops', 'tablets'],
-        fashion: ['mens-shirts', 'mens-shoes', 'mens-watches', 'womens-dresses', 'womens-shoes', 'womens-watches', 'womens-bags', 'womens-jewellery', 'tops', 'sunglasses'],
-        home: ['home-decoration', 'furniture', 'kitchen-accessories'],
-        beauty: ['beauty', 'fragrances', 'skin-care'],
-        sports: ['sports-accessories'],
-        automotive: ['vehicle', 'motorcycle'],
-        groceries: ['groceries']
-    };
-
     // Fetch categories
     useEffect(() => {
         fetch(
@@ -84,12 +73,6 @@ export default function MobileFiltersModal() {
         } catch (error) {
             console.error('Error in toggleCategory:', error);
         }
-    };
-
-    // Get categories by group
-    const getCategoriesByGroup = (groupName: string): Category[] => {
-        const groupCategories = categoryGroups[groupName as keyof typeof categoryGroups] || [];
-        return categories.filter(cat => groupCategories.includes(cat));
     };
 
     // Choose sort option
@@ -178,115 +161,40 @@ export default function MobileFiltersModal() {
                         <div className="p-4 overflow-y-auto max-h-[50vh] space-y-6">
                             {/* Categories */}
                             <div>
-                                <h3 className="font-semibold text-gray-900 mb-3">
-                                    Categories {selectedCategories.length > 0 && <span className="text-sm text-purple-600">({selectedCategories.length} selected)</span>}
-                                </h3>
-                                <div className="space-y-3 max-h-40 overflow-y-auto">
-                                    {/* Clear Categories Button */}
-                                    {selectedCategories.length > 0 && (
-                                        <button
-                                            onClick={() => setSelectedCategories([])}
-                                            className="text-sm text-red-600 hover:text-red-800 underline"
-                                        >
-                                            Clear all categories
-                                        </button>
-                                    )}
+                                <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {/* All Categories Button */}
+                                    <button
+                                        onClick={() => setSelectedCategories([])}
+                                        className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedCategories.length === 0
+                                                ? "bg-purple-600 text-white"
+                                                : "hover:bg-gray-100 text-gray-700 border"
+                                            }`}
+                                    >
+                                        All Categories
+                                    </button>
 
-                                    {/* Electronics Group */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">📱 Electronics</h4>
-                                        <div className="space-y-1 pl-4">
-                                            {getCategoriesByGroup('electronics').map((category) => (
-                                                <label key={category} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedCategories.includes(category)}
-                                                        onChange={() => toggleCategory(category)}
-                                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{formatCategoryName(category)}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Fashion Group */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">👗 Fashion</h4>
-                                        <div className="space-y-1 pl-4">
-                                            {getCategoriesByGroup('fashion').map((category) => (
-                                                <label key={category} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedCategories.includes(category)}
-                                                        onChange={() => toggleCategory(category)}
-                                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{formatCategoryName(category)}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Beauty Group */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">💄 Beauty</h4>
-                                        <div className="space-y-1 pl-4">
-                                            {getCategoriesByGroup('beauty').map((category) => (
-                                                <label key={category} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedCategories.includes(category)}
-                                                        onChange={() => toggleCategory(category)}
-                                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{formatCategoryName(category)}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Home Group */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">🏠 Home & Living</h4>
-                                        <div className="space-y-1 pl-4">
-                                            {getCategoriesByGroup('home').map((category) => (
-                                                <label key={category} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedCategories.includes(category)}
-                                                        onChange={() => toggleCategory(category)}
-                                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{formatCategoryName(category)}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Other Categories */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">🛍️ Other</h4>
-                                        <div className="space-y-1 pl-4">
-                                            {categories
-                                                .filter(cat => !Object.values(categoryGroups).flat().includes(cat))
-                                                .map((category) => (
-                                                    <label key={category} className="flex items-center space-x-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedCategories.includes(category)}
-                                                            onChange={() => toggleCategory(category)}
-                                                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                                        />
-                                                        <span className="text-sm text-gray-700">{formatCategoryName(category)}</span>
-                                                    </label>
-                                                ))}
-                                        </div>
-                                    </div>
+                                    {/* Individual Category Buttons */}
+                                    {categories.map((category) => {
+                                        const isSelected = selectedCategories.includes(category);
+                                        return (
+                                            <button
+                                                key={category}
+                                                onClick={() => toggleCategory(category)}
+                                                className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${isSelected
+                                                        ? "bg-purple-600 text-white"
+                                                        : "hover:bg-gray-100 text-gray-700 border"
+                                                    }`}
+                                            >
+                                                <span className="flex items-center justify-between">
+                                                    <span>{formatCategoryName(category)}</span>
+                                                    {isSelected && <span className="text-xs">✓</span>}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                            </div>
-
-                            {/* Price Range */}
+                            </div>                            {/* Price Range */}
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-3">Price Range</h3>
                                 <div className="flex gap-3">

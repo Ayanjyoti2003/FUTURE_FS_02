@@ -31,19 +31,20 @@ export default function SidebarFilters() {
             .then((data) => setCats(data));
     }, []);
 
-    // Collapse filters after a bit of scroll (desktop + mobile)
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 100) {
-                setShowCategories(false);
-                setShowPrice(false);
-                setShowSort(false);
-                setMobileOpen(false); // ✅ auto-close on mobile too
-            }
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    // Remove auto-close on scroll for better UX
+    // Users can manually close filters when needed
+    // useEffect(() => {
+    //     const handleScroll = () => {
+    //         if (window.scrollY > 100) {
+    //             setShowCategories(false);
+    //             setShowPrice(false);
+    //             setShowSort(false);
+    //             setMobileOpen(false);
+    //         }
+    //     };
+    //     window.addEventListener("scroll", handleScroll);
+    //     return () => window.removeEventListener("scroll", handleScroll);
+    // }, []);
 
     // Choose category
     const chooseCategory = (c?: string) => {
@@ -91,7 +92,7 @@ export default function SidebarFilters() {
         <>
             {/* Sidebar (desktop sticky, mobile drawer) */}
             <aside
-                className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-purple-50 p-4 shadow-lg overflow-y-auto transition-transform md:relative md:translate-x-0 md:sticky md:top-20 md:h-fit md:shadow-sm md:rounded-lg
+                className={`filter-container fixed inset-y-0 left-0 z-40 w-64 transform bg-purple-50 p-4 shadow-lg overflow-y-auto transition-transform md:relative md:translate-x-0 md:sticky md:top-20 md:h-fit md:shadow-sm md:rounded-lg
                 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
                 {/* Close button for mobile */}
