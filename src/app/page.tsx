@@ -1,8 +1,15 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import ProductList from "@/components/ProductList";
 import MobileSearchBar from "@/components/MobileSearchBar";
 import type { Product } from "@/types";
+
+// Import category images
+import electronics from "@/assets/electronics.jpeg";
+import fashion from "@/assets/fashion.jpeg";
+import home from "@/assets/home.jpeg";
+import sports from "@/assets/sports.jpeg";
 
 const BASE = process.env.NEXT_PUBLIC_DUMMYJSON_BASE_URL || "https://dummyjson.com";
 
@@ -77,7 +84,45 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Featured Products */}
+      {/* Categories Section - Moved above Featured Products */}
+      <div className="px-4 lg:px-0">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+          Shop by Category
+        </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { name: 'Electronics', image: electronics, href: '/product?category=smartphones' },
+            { name: 'Fashion', image: fashion, href: '/product?category=mens-shirts' },
+            { name: 'Home & Living', image: home, href: '/product?category=home-decoration' },
+            { name: 'Sports', image: sports, href: '/product?category=sports-accessories' }
+          ].map((category) => (
+            <Link
+              key={category.name}
+              href={category.href}
+              className="relative group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 bg-white"
+            >
+              <div className="relative h-32 md:h-40">
+                <Image
+                  src={category.image}
+                  alt={category.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-200"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm md:text-lg text-center px-2">
+                  {category.name}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Featured Products - Moved below Categories */}
       <div className="px-4 lg:px-0">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">
@@ -94,33 +139,6 @@ export default async function HomePage() {
         <Suspense fallback={<HomeLoading />}>
           <ProductList products={products} />
         </Suspense>
-      </div>
-
-      {/* Categories Section */}
-      <div className="px-4 lg:px-0">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
-          Shop by Category
-        </h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { name: 'Beauty', emoji: '💄', href: '/product?category=beauty' },
-            { name: 'Electronics', emoji: '📱', href: '/product?category=electronics' },
-            { name: 'Furniture', emoji: '🛋️', href: '/product?category=furniture' },
-            { name: 'Groceries', emoji: '🛒', href: '/product?category=groceries' }
-          ].map((category) => (
-            <Link
-              key={category.name}
-              href={category.href}
-              className="bg-white rounded-lg p-4 md:p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200 border"
-            >
-              <div className="text-2xl md:text-3xl mb-2">{category.emoji}</div>
-              <div className="font-semibold text-gray-800 text-sm md:text-base">
-                {category.name}
-              </div>
-            </Link>
-          ))}
-        </div>
       </div>
     </div>
   );
